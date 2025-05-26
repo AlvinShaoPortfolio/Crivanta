@@ -19,21 +19,37 @@ class CharacterContainer extends StatefulWidget{
 }
 
 class _CharacterContainer extends State<CharacterContainer>{
-  bool _pressed = false;
+  bool pressed = false;
+  bool showSkills = false;
 
   void togglePressed() {
     setState(() {
-      _pressed = !_pressed;
+      pressed = !pressed;
     });
+
+    if (pressed) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted && pressed) {
+          setState(() {
+            showSkills = true;
+          });
+        }
+      });
+    }
+    else {
+      setState(() {
+        showSkills = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        CharacterText(pressed: _pressed),
-        CharacterIcon(pressed: _pressed, onPressed: togglePressed), //pass the press variable down so I dont need a global
-        SkillsIcon(name: "Mental Clarity", pressed: _pressed, myColor: Colors.blue, xCoord: 0.0, yCoord: 0.5)
+        CharacterText(pressed: pressed),
+        CharacterIcon(pressed: pressed, onPressed: togglePressed), //passing variables down so I dont need a global but idk if this is common prac over just making stateful widgets
+        SkillsIcon(name: "Mental Clarity", showSkills: showSkills, myColor: Colors.blue, xCoord: 0.0, yCoord: -0.35)
       ]
     );
   }
@@ -89,32 +105,37 @@ class CharacterIcon extends StatelessWidget{// stateless because managed by the 
 }
 
 class SkillsIcon extends StatelessWidget{
-  final bool pressed;
+  final bool showSkills;
   final String name;
   final Color myColor;
   final double xCoord, yCoord;
 
-  const SkillsIcon({super.key, required this.name, required this.pressed, required this.myColor, required this.xCoord, required this.yCoord});
+  const SkillsIcon({super.key, required this.name, required this.showSkills, required this.myColor, required this.xCoord, required this.yCoord});
 
   @override
   Widget build(BuildContext context){
-    if(!pressed){
-      return const SizedBox.shrink();
-    }
 
-    return Center(
-      child: AnimatedContainer(
+    Alignment placement = showSkills ? Alignment(xCoord, yCoord) : Alignment(0.0, 0.0);
+
+    return AnimatedOpacity(
+        opacity: showSkills ? 1.0 : 0.0,
         duration: Duration(milliseconds: 500),
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(name, style: const TextStyle(color: Colors.white)),
-        ),
-      )
+        child: AnimatedAlign(
+            duration: Duration(milliseconds: 500),
+            alignment: placement,
+            child: Container(
+              width: 100,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                    name, style: const TextStyle(color: Colors.white)),
+              ),
+            )
+        )
     );
   }
 }
