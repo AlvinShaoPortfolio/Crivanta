@@ -33,6 +33,7 @@ class _CharacterContainer extends State<CharacterContainer>{
       children: [
         CharacterText(pressed: _pressed),
         CharacterIcon(pressed: _pressed, onPressed: togglePressed), //pass the press variable down so I dont need a global
+        SkillsIcon(name: "Mental Clarity", pressed: _pressed, myColor: Colors.blue, xCoord: 0.0, yCoord: 0.5)
       ]
     );
   }
@@ -87,3 +88,33 @@ class CharacterIcon extends StatelessWidget{// stateless because managed by the 
   }
 }
 
+class SkillsIcon extends StatelessWidget{
+  final bool pressed;
+  final String name;
+  final Color myColor;
+  final double xCoord, yCoord;
+
+  const SkillsIcon({super.key, required this.name, required this.pressed, required this.myColor, required this.xCoord, required this.yCoord});
+
+  @override
+  Widget build(BuildContext context){
+    if(!pressed){
+      return const SizedBox.shrink();
+    }
+
+    return Center(
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 500),
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(name, style: const TextStyle(color: Colors.white)),
+        ),
+      )
+    );
+  }
+}
