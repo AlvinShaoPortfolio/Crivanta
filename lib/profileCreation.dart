@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
+
 
 class ProfileCreationScreen extends StatelessWidget{
   const ProfileCreationScreen({super.key});
 
+
   @override
   Widget build(BuildContext context){
     return Scaffold(
-      body: CharacterContainer()
+        body: CharacterContainer()
     );
   }
 }
 
+
 class CharacterContainer extends StatefulWidget{
   const CharacterContainer({super.key});
+
 
   @override
   State<CharacterContainer> createState() => _CharacterContainer();
 }
 
+
 class _CharacterContainer extends State<CharacterContainer>{
   bool pressed = false;
   bool showSkills = false;
+
 
   void togglePressed() {
     setState(() {
       pressed = !pressed;
     });
+
 
     if (pressed) {
       Future.delayed(const Duration(milliseconds: 100), () {
@@ -43,29 +51,41 @@ class _CharacterContainer extends State<CharacterContainer>{
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
+
+
     return Stack(
-      children: [
-        CharacterText(pressed: pressed),
-        CharacterIcon(pressed: pressed, onPressed: togglePressed), //passing variables down so I dont need a global but idk if this is common prac over just making stateful widgets
-        SkillsIcon(name: "Mental Clarity", showSkills: showSkills, myColor: Colors.blue, xCoord: 0.0, yCoord: -0.35)
-      ]
+        children: [
+          SkillsIcon(name: "Mind", showSkills: showSkills, myColor: Colors.blue, xCoord: .8, yCoord: -0.15),
+          SkillsIcon(name: "Body", showSkills: showSkills, myColor: Colors.blue, xCoord: 0.0, yCoord: -0.3),
+          SkillsIcon(name: "Soul", showSkills: showSkills, myColor: Colors.blue, xCoord: -.8, yCoord: -0.15),
+          SkillsIcon(name: "Emotions", showSkills: showSkills, myColor: Colors.blue, xCoord: 0.0, yCoord: 0.3),
+          SkillsIcon(name: "Financial", showSkills: showSkills, myColor: Colors.blue, xCoord: .8, yCoord: 0.15),
+          SkillsIcon(name: "Social", showSkills: showSkills, myColor: Colors.blue, xCoord: -.8, yCoord: 0.15),
+          CharacterText(pressed: pressed),
+          CharacterIcon(pressed: pressed, onPressed: togglePressed), //passing variables down so I dont need a global but idk if this is common practice over just making stateful widgets
+        ]
     );
   }
 }
 
+
 class CharacterText extends StatelessWidget{
   final bool pressed;
 
+
   const CharacterText({super.key, required this.pressed});
+
 
   @override
   Widget build(BuildContext context){
     Alignment placement = pressed ? Alignment(0.0, -0.9) : Alignment(0.0, -0.35);
 
+
     return AnimatedContainer(
-      duration: Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 250),
       alignment: placement,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -80,29 +100,68 @@ class CharacterText extends StatelessWidget{
   }
 }
 
+
 class CharacterIcon extends StatelessWidget{// stateless because managed by the container
   final bool pressed;
   final VoidCallback onPressed;
 
+
   const CharacterIcon({super.key, required this.pressed, required this.onPressed});
+
 
   @override
   Widget build(BuildContext context){
-    double iconSize = pressed ? 120: 200;
+    double iconSize = pressed ? 100: 200;
     return Center(
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 500),
-        width: iconSize,
-        height: iconSize,
-        child: MaterialButton(
-          onPressed: onPressed,
-          color: Colors.blue,
-          shape: CircleBorder(),
-        ),
-      )
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 250),
+          width: iconSize,
+          height: iconSize,
+          child: MaterialButton(
+            onPressed: onPressed,
+            color: Colors.blue,
+            shape: CircleBorder(),
+          ),
+        )
     );
   }
 }
+
+
+/*
+class LinkToSkill extends StatelessWidget{
+ final Offset endPoint, startPoint;
+ final Color color;
+
+
+ const LinkToSkill({super.key, required this.startPoint, required this.endPoint, required this.color});
+
+
+ @override
+ Widget build(BuildContext context){
+   final dx = endPoint.dx - startPoint.dx;
+   final dy = endPoint.dy - startPoint.dy;
+   final length = sqrt(dx * dx + dy * dy);
+   final angle = atan2(dy, dx);
+
+
+   return Positioned(
+     left: startPoint.dx,
+     top: startPoint.dy,
+     child: Transform.rotate(
+       angle: angle,
+       alignment: Alignment.topLeft,
+       child: Container(
+         width: length,
+         height: 5,
+         color: color,
+       ),
+     ),
+   );
+ }
+}
+*/
+
 
 class SkillsIcon extends StatelessWidget{
   final bool showSkills;
@@ -110,32 +169,42 @@ class SkillsIcon extends StatelessWidget{
   final Color myColor;
   final double xCoord, yCoord;
 
+
   const SkillsIcon({super.key, required this.name, required this.showSkills, required this.myColor, required this.xCoord, required this.yCoord});
+
 
   @override
   Widget build(BuildContext context){
-
     Alignment placement = showSkills ? Alignment(xCoord, yCoord) : Alignment(0.0, 0.0);
 
-    return AnimatedOpacity(
+
+    return AnimatedOpacity(//controlling the fading in
         opacity: showSkills ? 1.0 : 0.0,
-        duration: Duration(milliseconds: 500),
-        child: AnimatedAlign(
-            duration: Duration(milliseconds: 500),
+        duration: Duration(milliseconds: 250),
+        child: AnimatedAlign(//controlling the axis change
+            duration: Duration(milliseconds: 250),
             alignment: placement,
-            child: Container(
-              width: 100,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Text(
-                    name, style: const TextStyle(color: Colors.white)),
-              ),
+            child: Stack(
+                children: [
+                  Container( //the actual box
+                    width: 100,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(name, style: const TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ]
             )
         )
     );
   }
 }
+
+
+
+
+
