@@ -49,20 +49,3 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAnEUMyFNegKq50EZtWY09GJ7UBzUsKwIU',
-    appId: '1:425570911695:android:f6fa0929910b7382263eba',
-    messagingSenderId: '425570911695',
-    projectId: 'crivanta-3ede0',
-    storageBucket: 'crivanta-3ede0.firebasestorage.app',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAUIraoVHBGS6AzRkYQLTMDi2oOyl4diiY',
-    appId: '1:425570911695:ios:26c1fa7bb6f7bfad263eba',
-    messagingSenderId: '425570911695',
-    projectId: 'crivanta-3ede0',
-    storageBucket: 'crivanta-3ede0.firebasestorage.app',
-    iosBundleId: 'com.alvinshao.crivanta',
-  );
-}
