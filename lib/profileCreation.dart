@@ -45,7 +45,6 @@ class _CharacterContainer extends State<CharacterContainer>{
 
   @override
   Widget build(BuildContext context) {
-
     return Stack(
         children: [
           SkillsIcon(name: "Mind", showSkills: showSkills, myColor: Colors.blue, xCoord: .8, yCoord: -0.15),
