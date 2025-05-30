@@ -1,5 +1,5 @@
+import 'package:crivanta/LoginScreen.dart';
 import 'package:flutter/material.dart';
-import 'LoginScreen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -20,9 +20,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       });
     });
     Future.delayed(const Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     });
   }
