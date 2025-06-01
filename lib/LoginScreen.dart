@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'SignupScreen.dart';
-import 'profileCreation.dart';
+import 'UserDashboard.dart';
 import 'HeaderFileForFunctions.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -64,13 +64,22 @@ class _LoginScreen extends State<LoginScreen>{
                     ),
                     onPressed: () async {
                       try {
-                        await authService.signIn(
+                        UserCredential credential = await authService.signIn(
                           emailController.text.trim(),
                           passwordController.text.trim(),
                         );
+                        User? user = credential.user;
+
+                        if (user != null && !user.emailVerified) {
+                          setState(() {
+                            error = 'Please verify your email before logging in.';
+                          });
+                          return;
+                        }
+
                         Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => const ProfileCreationScreen()),
+                            MaterialPageRoute(builder: (context) => const Userdashboard()),
                         );
                       } on FirebaseAuthException catch(e){
                         setState((){
@@ -94,7 +103,6 @@ class _LoginScreen extends State<LoginScreen>{
                   ),
                 ),
               ),
-
               TextButton( //redirection to the sign up page button
                 onPressed: () {
                   Navigator.push(

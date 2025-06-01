@@ -1,5 +1,5 @@
+import 'package:crivanta/LoginScreen.dart';
 import 'package:flutter/material.dart';
-import 'profileCreation.dart';
 import 'HeaderFileForFunctions.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +19,7 @@ class _SignupScreen extends State<SignupScreen>{
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   String error = '';
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +42,7 @@ class _SignupScreen extends State<SignupScreen>{
               const SizedBox(height: 16),
               InputField(myIcon: Icons.lock_open_rounded, horizontalInset: 32, verticalInset: 16,text: "Password", myColor: Colors.black12, obscureText: true, controller: passwordController),
               const SizedBox(height: 16),
+
               if (error.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -54,24 +56,43 @@ class _SignupScreen extends State<SignupScreen>{
                 ),
 
               ElevatedButton(
-                onPressed: () async {
+                onPressed: isLoading ? null : () async {
+                  setState(() => isLoading = true);
+                  final email = emailController.text.trim();
+                  final password = passwordController.text.trim();
+
+                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  if (!emailRegex.hasMatch(email)) {
+                    setState(() {
+                      error = 'Please enter a valid email address.';
+                    });
+                    return;
+                  }
+
                   try {
                     await authService.signUp(
-                      emailController.text.trim(),
-                      passwordController.text.trim(),
+                      email,
+                      password
                     );
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ProfileCreationScreen()),
-                    );
+
+                    User? user = FirebaseAuth.instance.currentUser;
+                    if (user != null && !user.emailVerified) {
+                      await user.sendEmailVerification();
+                      _showVerificationDialog(user);
+                    }
+
+                    setState(() {
+                      error = 'Verification email sent. Please verify before proceeding.';
+                    });
                   }
                   on FirebaseAuthException catch (e) {
                     setState(() {
                       error = e.message ?? 'Signup failed';
+                      isLoading = false;
                     });
                   }
                 },
-                child: const Text('Sign up'),
+                child: isLoading ? const CircularProgressIndicator() : const Text('Sign up'),
               ),
             ],
           ),
@@ -79,4 +100,40 @@ class _SignupScreen extends State<SignupScreen>{
       ),
     );
   }
+
+  void _showVerificationDialog(User user) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Verify Your Email'),
+          content: const Text('A verification email has been sent. Please verify and click Continue.'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await user.reload();
+                user = authService.currentUser!;
+                if (user.emailVerified) {
+                  Navigator.pop(context); // close dialog
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  );
+                } else {
+                  setState(() {
+                    error = "Email not verified yet.";
+                    isLoading = false;
+                  });
+                }
+              },
+              child: const Text('Continue'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
+
