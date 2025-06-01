@@ -3,8 +3,22 @@ import 'SignupScreen.dart';
 import 'profileCreation.dart';
 import 'HeaderFileForFunctions.dart';
 
-class LoginScreen extends StatelessWidget {
+import 'package:firebase_auth/firebase_auth.dart';
+import 'FirebaseAuthentication.dart';
+
+
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreen();
+}
+
+class _LoginScreen extends State<LoginScreen>{
+  final authService = FirebaseAuthentication();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  String error = '';
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +35,21 @@ class LoginScreen extends StatelessWidget {
               const Text('Welcome to Crivanta', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const Text('Sign in to continue', style: TextStyle(fontSize: 15)),
               SizedBox(height: 20),
-              //InputField(myIcon: Icons.email_outlined, horizontalInset: 32, verticalInset: 16, text: "Email", myColor: Colors.black12, obscureText: false),
+              InputField(myIcon: Icons.email_outlined, horizontalInset: 32, verticalInset: 16, text: "Email", myColor: Colors.black12, obscureText: false, controller: emailController),
               SizedBox(height: 10),
-              //InputField(myIcon: Icons.lock_open_rounded, horizontalInset: 32, verticalInset: 16, text: "Password", myColor: Colors.black12, obscureText: true),
-              Padding( //sign in button
+              InputField(myIcon: Icons.lock_open_rounded, horizontalInset: 32, verticalInset: 16, text: "Password", myColor: Colors.black12, obscureText: true, controller: passwordController),
+
+              if (error.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    error,
+                    style: const TextStyle(color: Colors.red
+                    ),
+                  ),
+                ),
+
+              Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
                 child: SizedBox(
                   width: double.infinity,
@@ -37,11 +62,33 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ProfileCreationScreen()),
-                      );
+                    onPressed: () async {
+                      try {
+                        await authService.signIn(
+                          emailController.text.trim(),
+                          passwordController.text.trim(),
+                        );
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ProfileCreationScreen()),
+                        );
+                      } on FirebaseAuthException catch(e){
+                        setState((){
+                          switch (e.code) {
+                            case 'user-not-found':
+                              error = 'No user found with this email.';
+                              break;
+                            case 'wrong-password':
+                              error = 'Incorrect password.';
+                              break;
+                            case 'invalid-email':
+                              error = 'Invalid email address.';
+                              break;
+                            default:
+                              error = 'Login failed: ${e.message}';
+                          }
+                        });
+                      }
                     },
                     child: const Text('Sign in', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),

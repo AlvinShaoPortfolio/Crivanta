@@ -41,7 +41,6 @@ class _SignupScreen extends State<SignupScreen>{
               const SizedBox(height: 16),
               InputField(myIcon: Icons.lock_open_rounded, horizontalInset: 32, verticalInset: 16,text: "Password", myColor: Colors.black12, obscureText: true, controller: passwordController),
               const SizedBox(height: 16),
-
               if (error.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -61,7 +60,10 @@ class _SignupScreen extends State<SignupScreen>{
                       emailController.text.trim(),
                       passwordController.text.trim(),
                     );
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ProfileCreationScreen()),);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfileCreationScreen()),
+                    );
                   }
                   on FirebaseAuthException catch (e) {
                     setState(() {
