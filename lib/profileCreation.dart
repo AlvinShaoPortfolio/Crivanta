@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 import 'UserDashboard.dart';
 
@@ -65,24 +68,54 @@ class _startingQuestionnaire extends State<startingQuestionnaire>{
     });
   }
 
-  void handleSubmit() {
-    for (int i = 0; i < questionData.length; i++) {
-      final selected = answers[i] ?? {};
-      print("Q${i + 1}: ${selected.join(', ')}");
+  void handleSubmit() async{
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be logged in.')),
+      );
+      return;
     }
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const UserDashboard()),
-    );
+
+    Map<String, dynamic> submission = {};
+
+    for (int i = 0; i < questionData.length; i++) {
+      String questionText = questionData[i]["question"];
+      Set<String> selectedOptions = answers[i] ?? {};
+      submission[questionText] = selectedOptions.toList();
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('profile') // optional: or just use .doc('profile')
+          .doc('questionnaire')
+          .set({
+        'timestamp': FieldValue.serverTimestamp(),
+        'responses': submission,
+      });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const UserDashboard()),
+      );
+    }
+    catch (e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to submit: $e')),
+      );
+    }
   }
 
   bool hasOneAnswer(){
-      for (int i = 0; i < questionData.length; i++) {
-        if (!answers.containsKey(i) || answers[i]!.isEmpty) {
-          return false;
-        }
+    for (int i = 0; i < questionData.length; i++) {
+      if (!answers.containsKey(i) || answers[i]!.isEmpty) {
+        return false;
       }
-      return true;
+    }
+    return true;
   }
 
   @override
@@ -121,7 +154,6 @@ class MultipleChoiceQuestion extends StatefulWidget{
   final List<String> options;
   final int maxSelections;
   final void Function(Set<String>) onSelectionChanged;
-
 
   const MultipleChoiceQuestion({super.key, required this.question, required this.options, required this.maxSelections, required this.onSelectionChanged});
 
