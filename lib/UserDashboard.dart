@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Userdashboard extends StatelessWidget{
-  const Userdashboard({super.key});
+class UserDashboard extends StatelessWidget{
+  const UserDashboard({super.key});
 
   @override
   Widget build(BuildContext context){
@@ -93,16 +93,16 @@ class CharacterIcon extends StatelessWidget{// stateless because managed by the 
   Widget build(BuildContext context){
     double iconSize = pressed ? 100: 200;
     return Center(
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 250),
-          width: iconSize,
-          height: iconSize,
-          child: MaterialButton(
-            onPressed: onPressed,
-            color: Colors.blue,
-            shape: CircleBorder(),
-          ),
-        )
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 250),
+        width: iconSize,
+        height: iconSize,
+        child: MaterialButton(
+          onPressed: onPressed,
+          color: Colors.blue,
+          shape: CircleBorder(),
+        ),
+      )
     );
   }
 }
@@ -120,27 +120,27 @@ class SkillsIcon extends StatelessWidget{
     Alignment placement = showSkills ? Alignment(xCoord, yCoord) : Alignment(0.0, 0.0);
 
     return AnimatedOpacity(//controlling the fading in
-        opacity: showSkills ? 1.0 : 0.0,
+      opacity: showSkills ? 1.0 : 0.0,
+      duration: Duration(milliseconds: 250),
+      child: AnimatedAlign(//controlling the axis change
         duration: Duration(milliseconds: 250),
-        child: AnimatedAlign(//controlling the axis change
-            duration: Duration(milliseconds: 250),
-            alignment: placement,
-            child: Stack(
-                children: [
-                  Container( //the actual box
-                    width: 100,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(name, style: const TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ]
-            )
+        alignment: placement,
+        child: Stack(
+          children: [
+            Container( //the actual box
+              width: 100,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(name, style: const TextStyle(color: Colors.white)),
+              ),
+            ),
+          ]
         )
+      )
     );
   }
 }

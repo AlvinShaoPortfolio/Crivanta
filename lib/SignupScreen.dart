@@ -1,5 +1,8 @@
-import 'package:crivanta/LoginScreen.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+
+import 'package:crivanta/LoginScreen.dart';
+import 'profileCreation.dart';
 import 'HeaderFileForFunctions.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -42,18 +45,7 @@ class _SignupScreen extends State<SignupScreen>{
               const SizedBox(height: 16),
               InputField(myIcon: Icons.lock_open_rounded, horizontalInset: 32, verticalInset: 16,text: "Password", myColor: Colors.black12, obscureText: true, controller: passwordController),
               const SizedBox(height: 16),
-
-              if (error.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 32.0, vertical: 8),
-                  child: Text(
-                    error,
-                    style: const TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              DisplayError(error: error),
 
               ElevatedButton(
                 onPressed: isLoading ? null : () async {
@@ -118,7 +110,7 @@ class _SignupScreen extends State<SignupScreen>{
                   Navigator.pop(context); // close dialog
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    MaterialPageRoute(builder: (context) => const ProfileCreation()),
                   );
                 } else {
                   setState(() {

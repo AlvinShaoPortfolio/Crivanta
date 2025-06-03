@@ -45,8 +45,20 @@ class InputField extends StatelessWidget{
   }
 }
 
-bool isValidEmail(String email) {
-  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-  return emailRegex.hasMatch(email);
+class DisplayError extends StatelessWidget {
+  final String error;
+  const DisplayError({super.key, required this.error});
+
+  @override
+  Widget build(BuildContext context){
+    if (error.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Text(error, style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
 }
 

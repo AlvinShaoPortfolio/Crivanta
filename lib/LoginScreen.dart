@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'SignupScreen.dart';
 import 'UserDashboard.dart';
 import 'HeaderFileForFunctions.dart';
+import 'profileCreation.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'FirebaseAuthentication.dart';
@@ -38,16 +39,7 @@ class _LoginScreen extends State<LoginScreen>{
               InputField(myIcon: Icons.email_outlined, horizontalInset: 32, verticalInset: 16, text: "Email", myColor: Colors.black12, obscureText: false, controller: emailController),
               SizedBox(height: 10),
               InputField(myIcon: Icons.lock_open_rounded, horizontalInset: 32, verticalInset: 16, text: "Password", myColor: Colors.black12, obscureText: true, controller: passwordController),
-
-              if (error.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Text(
-                    error,
-                    style: const TextStyle(color: Colors.red
-                    ),
-                  ),
-                ),
+              DisplayError(error: error),
 
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
@@ -79,7 +71,8 @@ class _LoginScreen extends State<LoginScreen>{
 
                         Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => const Userdashboard()),
+                            MaterialPageRoute(builder: (context) => const ProfileCreation()),
+                            //MaterialPageRoute(builder: (context) => const UserDashboard()),
                         );
                       } on FirebaseAuthException catch(e){
                         setState((){
