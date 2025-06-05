@@ -51,7 +51,7 @@ class _CharacterContainer extends State<CharacterContainer>{
           SkillsIcon(name: "Body", showSkills: showSkills, myColor: Colors.blue, xCoord: 0.0, yCoord: -0.3),
           SkillsIcon(name: "Soul", showSkills: showSkills, myColor: Colors.blue, xCoord: -.8, yCoord: -0.15),
           SkillsIcon(name: "Emotions", showSkills: showSkills, myColor: Colors.blue, xCoord: 0.0, yCoord: 0.3),
-          SkillsIcon(name: "Financial", showSkills: showSkills, myColor: Colors.blue, xCoord: .8, yCoord: 0.15),
+          SkillsIcon(name: "Finance", showSkills: showSkills, myColor: Colors.blue, xCoord: .8, yCoord: 0.15),
           SkillsIcon(name: "Social", showSkills: showSkills, myColor: Colors.blue, xCoord: -.8, yCoord: 0.15),
           CharacterText(pressed: pressed),
           CharacterIcon(pressed: pressed, onPressed: togglePressed), //passing variables down so I dont need a global but idk if this is common practice over just making stateful widgets

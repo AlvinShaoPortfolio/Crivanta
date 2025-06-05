@@ -54,6 +54,7 @@ class _LoginScreen extends State<LoginScreen>{
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
+
                     onPressed: () async {
                       try {
                         UserCredential credential = await authService.signIn(
@@ -74,7 +75,8 @@ class _LoginScreen extends State<LoginScreen>{
                             MaterialPageRoute(builder: (context) => const ProfileCreation()),
                             //MaterialPageRoute(builder: (context) => const UserDashboard()),
                         );
-                      } on FirebaseAuthException catch(e){
+                      }
+                      on FirebaseAuthException catch(e){
                         setState((){
                           switch (e.code) {
                             case 'user-not-found':

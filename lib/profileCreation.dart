@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 import 'UserDashboard.dart';
 
 class ProfileCreation extends StatelessWidget{
@@ -10,19 +9,19 @@ class ProfileCreation extends StatelessWidget{
 
   @override
   Widget build(BuildContext context){
-    return startingQuestionnaire();
+    return StartingQuestionnaire();
   }
 }
 
-class startingQuestionnaire extends StatefulWidget{
+class StartingQuestionnaire extends StatefulWidget{
 
-  const startingQuestionnaire({super.key});
+  const StartingQuestionnaire({super.key});
 
   @override
-  State<startingQuestionnaire> createState() => _startingQuestionnaire();
+  State<StartingQuestionnaire> createState() => _StartingQuestionnaire();
 }
 
-class _startingQuestionnaire extends State<startingQuestionnaire>{
+class _StartingQuestionnaire extends State<StartingQuestionnaire>{
   final List<Map<String, dynamic>> questionData = [
     {
       "question": "What is your age group?",
@@ -88,13 +87,22 @@ class _startingQuestionnaire extends State<startingQuestionnaire>{
 
     try {
       await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('profile') // optional: or just use .doc('profile')
-          .doc('questionnaire')
-          .set({
+        .collection('users')
+        .doc(user.uid)
+        .collection('profile')
+        .doc('onboarding')
+        .set({
         'timestamp': FieldValue.serverTimestamp(),
         'responses': submission,
+        'experience':{
+          'mind': 0,
+          'body': 0,
+          'soul': 0,
+          'emotional': 0,
+          'financial': 0,
+          'social': 0,
+          'productivity': 0,
+        }
       });
 
       Navigator.pushReplacement(
@@ -109,15 +117,6 @@ class _startingQuestionnaire extends State<startingQuestionnaire>{
     }
   }
 
-  bool hasOneAnswer(){
-    for (int i = 0; i < questionData.length; i++) {
-      if (!answers.containsKey(i) || answers[i]!.isEmpty) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,13 +125,7 @@ class _startingQuestionnaire extends State<startingQuestionnaire>{
         children: [
           ...List.generate(questionData.length, (i) {
             final q = questionData[i];
-            return MultipleChoiceQuestion(
-              key: ValueKey(i),
-              question: q["question"],
-              options: List<String>.from(q["options"]),
-              maxSelections: q["max"],
-              onSelectionChanged: (selected) => updateAnswer(i, selected),
-            );
+            return MultipleChoiceQuestion(key: ValueKey(i), question: q["question"], options: List<String>.from(q["options"]), maxSelections: q["max"], onSelectionChanged: (selected) => updateAnswer(i, selected),);
           }),
           const SizedBox(height: 20),
           ElevatedButton(
@@ -147,6 +140,14 @@ class _startingQuestionnaire extends State<startingQuestionnaire>{
     );
   }
 
+  bool hasOneAnswer(){
+    for (int i = 0; i < questionData.length; i++) {
+      if (!answers.containsKey(i) || answers[i]!.isEmpty) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 class MultipleChoiceQuestion extends StatefulWidget{

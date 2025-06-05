@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-import 'package:crivanta/LoginScreen.dart';
 import 'profileCreation.dart';
 import 'HeaderFileForFunctions.dart';
 
@@ -40,35 +39,26 @@ class _SignupScreen extends State<SignupScreen>{
                 height: 100,
               ),
               const Text('Sign up', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 16), //email textblurb
               InputField(myIcon: Icons.email_outlined, horizontalInset: 32, verticalInset: 16, text: "Email", myColor: Colors.black12, obscureText: false, controller: emailController),
-              const SizedBox(height: 16),
+              const SizedBox(height: 16), //password text blurb
               InputField(myIcon: Icons.lock_open_rounded, horizontalInset: 32, verticalInset: 16,text: "Password", myColor: Colors.black12, obscureText: true, controller: passwordController),
               const SizedBox(height: 16),
-              DisplayError(error: error),
+              DisplayError(error: error), //error message if required
 
               ElevatedButton(
                 onPressed: isLoading ? null : () async {
                   setState(() => isLoading = true);
                   final email = emailController.text.trim();
                   final password = passwordController.text.trim();
-
-                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                  if (!emailRegex.hasMatch(email)) {
-                    setState(() {
-                      error = 'Please enter a valid email address.';
-                    });
-                    return;
-                  }
+                  checkEmail(email); //checks to see if the email follows correct format
 
                   try {
-                    await authService.signUp(
-                      email,
-                      password
-                    );
+                    await authService.signUp(email, password); //creates a firebase user and waits for it to fufill
 
-                    User? user = FirebaseAuth.instance.currentUser;
-                    if (user != null && !user.emailVerified) {
+                    User? user = FirebaseAuth.instance.currentUser; //sets user to the instance of the current user
+
+                    if (user != null && !user.emailVerified) { //if user has not verified then keep them on the verification dialog
                       await user.sendEmailVerification();
                       _showVerificationDialog(user);
                     }
@@ -77,14 +67,14 @@ class _SignupScreen extends State<SignupScreen>{
                       error = 'Verification email sent. Please verify before proceeding.';
                     });
                   }
-                  on FirebaseAuthException catch (e) {
+                  on FirebaseAuthException catch (e) { // if signup failed show error msg
                     setState(() {
                       error = e.message ?? 'Signup failed';
                       isLoading = false;
                     });
                   }
                 },
-                child: isLoading ? const CircularProgressIndicator() : const Text('Sign up'),
+                child: isLoading ? const CircularProgressIndicator() : const Text('Sign up'), // loading circle on the sign up
               ),
             ],
           ),
@@ -125,6 +115,16 @@ class _SignupScreen extends State<SignupScreen>{
         );
       },
     );
+  }
+
+  void checkEmail(String email){
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      setState(() {
+        error = 'Please enter a valid email address.';
+      });
+      return;
+    }
   }
 }
 
