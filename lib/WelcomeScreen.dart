@@ -1,3 +1,4 @@
+import 'package:crivanta/HeaderFileForFunctions.dart';
 import 'package:crivanta/LoginScreen.dart';
 import 'package:flutter/material.dart';
 
@@ -35,6 +36,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
+              CrivantaLogo(),
               Text("Crivanta", style: TextStyle(fontSize: 80, fontWeight: FontWeight.bold)),
               Text("Discover your dream self", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
             ],

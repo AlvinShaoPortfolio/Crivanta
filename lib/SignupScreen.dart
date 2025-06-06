@@ -97,7 +97,7 @@ class _SignupScreen extends State<SignupScreen>{
                 await user.reload();
                 user = authService.currentUser!;
                 if (user.emailVerified) {
-                  Navigator.pop(context); // close dialog
+                  Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const ProfileCreation()),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:crivanta/HeaderFileForFunctions.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserDashboard extends StatelessWidget{
   const UserDashboard({super.key});
@@ -22,7 +25,10 @@ class _CharacterContainer extends State<CharacterContainer>{
   bool pressed = false;
   bool showSkills = false;
 
-  void togglePressed() {
+  Map<String, Color> skillColors = {};
+  bool isLoading = true;
+
+  void togglePressed() async{
     setState(() {
       pressed = !pressed;
     });
@@ -41,18 +47,54 @@ class _CharacterContainer extends State<CharacterContainer>{
         showSkills = false;
       });
     }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      //await increaseExperience(user.uid, "body", 100);
+      await loadColors();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadColors();
+  }
+
+  Future<void> loadColors() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid;
+    if (userId == null) return;
+
+    Map<String, Color> newColors = {};
+    final List<String> fields = [
+      'mind', 'body', 'soul', 'emotional', 'financial', 'social'
+    ];
+
+    for (final field in fields) {
+      newColors[field] = await getColor(userId, field);
+    }
+
+    setState(() {
+      skillColors = newColors;
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading || skillColors.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Stack(
         children: [
-          SkillsIcon(name: "Mind", showSkills: showSkills, myColor: Colors.blue, xCoord: .8, yCoord: -0.15),
-          SkillsIcon(name: "Body", showSkills: showSkills, myColor: Colors.blue, xCoord: 0.0, yCoord: -0.3),
-          SkillsIcon(name: "Soul", showSkills: showSkills, myColor: Colors.blue, xCoord: -.8, yCoord: -0.15),
-          SkillsIcon(name: "Emotions", showSkills: showSkills, myColor: Colors.blue, xCoord: 0.0, yCoord: 0.3),
-          SkillsIcon(name: "Finance", showSkills: showSkills, myColor: Colors.blue, xCoord: .8, yCoord: 0.15),
-          SkillsIcon(name: "Social", showSkills: showSkills, myColor: Colors.blue, xCoord: -.8, yCoord: 0.15),
+          SkillsIcon(name: "Mind", showSkills: showSkills, myColor: skillColors["mind"]!, xCoord: .8, yCoord: -0.15),
+          SkillsIcon(name: "Body", showSkills: showSkills, myColor: skillColors["body"]!, xCoord: 0.0, yCoord: -0.3),
+          SkillsIcon(name: "Soul", showSkills: showSkills, myColor: skillColors["soul"]!, xCoord: -.8, yCoord: -0.15),
+          SkillsIcon(name: "Emotions", showSkills: showSkills, myColor: skillColors["emotional"]!, xCoord: 0.0, yCoord: 0.3),
+          SkillsIcon(name: "Finance", showSkills: showSkills, myColor: skillColors["financial"]!, xCoord: .8, yCoord: 0.15),
+          SkillsIcon(name: "Social", showSkills: showSkills, myColor: skillColors["social"]!, xCoord: -.8, yCoord: 0.15),
           CharacterText(pressed: pressed),
           CharacterIcon(pressed: pressed, onPressed: togglePressed), //passing variables down so I dont need a global but idk if this is common practice over just making stateful widgets
         ]
@@ -76,7 +118,7 @@ class CharacterText extends StatelessWidget{
         mainAxisSize: MainAxisSize.min,
         children:[
           Text(('Your Journey Begins'), style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-          Text(('Create your character and start your adventure'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          Text(('Ready to improve today?'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -131,11 +173,11 @@ class SkillsIcon extends StatelessWidget{
               width: 100,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: myColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
-                child: Text(name, style: const TextStyle(color: Colors.white)),
+                child: Text(name, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               ),
             ),
           ]
@@ -144,7 +186,6 @@ class SkillsIcon extends StatelessWidget{
     );
   }
 }
-
 
 
 
