@@ -93,9 +93,10 @@ class _SkillTabState extends State<SkillTab> {
         title: Text(widget.skillName),
         backgroundColor: widget.skillColor,
       ),
-      body: isLoading ? const Center(child: CircularProgressIndicator()) : Padding(
+      body: isLoading ? const Center(child: CircularProgressIndicator()) : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SkillProgressCard(
               skillName: widget.skillName,
@@ -105,7 +106,7 @@ class _SkillTabState extends State<SkillTab> {
               barColor: widget.skillColor,
             ),
             const SizedBox(height: 20),
-            Expanded(child: getSkillSpecificContent(widget.skillName.toLowerCase())),
+            getSkillSpecificContent(widget.skillName.toLowerCase()),
           ],
         ),
       ),

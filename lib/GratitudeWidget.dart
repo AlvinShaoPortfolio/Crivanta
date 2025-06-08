@@ -14,55 +14,44 @@ class _GratitudeWidgetState extends State<GratitudeWidget> {
   final TextEditingController _controller = TextEditingController();
   final String todayId = DateFormat('yyyy-MM-dd').format(DateTime.now());
   List<String> todayEntries = [];
-  Map<String, List<String>> history = {};
+  Map<String, List<String>> pastGratitudes = {};
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchGratitudes();
+    loadGratitudes();
   }
 
-  Future<void> fetchGratitudes() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print("User is null");
-        return;
-      }
-
-      final collection = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('gratitudes');
-
-      final snapshots = await collection.orderBy(FieldPath.documentId, descending: true).get();
-
-      Map<String, List<String>> newHistory = {};
-
-      for (final doc in snapshots.docs) {
-        final data = doc.data();
-        final entries = List<String>.from(data['entries'] ?? []);
-        newHistory[doc.id] = entries;
-      }
-
-      setState(() {
-        todayEntries = newHistory[todayId] ?? [];
-        history = newHistory;
-        isLoading = false;
-      });
-    }
-    catch (e) {
-      print("Error fetching gratitudes: $e");
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> addGratitude(String note) async {
+  Future<void> loadGratitudes() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null || note.trim().isEmpty) return;
+    if (user == null) return;
+
+    final ref = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('gratitudes');
+
+    final snap = await ref.orderBy(FieldPath.documentId, descending: true).get();
+
+    final Map<String, List<String>> loaded = {};
+    for (final doc in snap.docs) {
+      final entries = List<String>.from(doc.data()['entries'] ?? []);
+      loaded[doc.id] = entries;
+    }
+
+    setState(() {
+      todayEntries = loaded[todayId] ?? [];
+      pastGratitudes = Map.fromEntries(
+        loaded.entries.where((e) => e.key != todayId),
+      );
+      isLoading = false;
+    });
+  }
+
+  Future<void> submitGratitude(String text) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || text.trim().isEmpty) return;
 
     final docRef = FirebaseFirestore.instance
         .collection('users')
@@ -70,100 +59,92 @@ class _GratitudeWidgetState extends State<GratitudeWidget> {
         .collection('gratitudes')
         .doc(todayId);
 
-    final doc = await docRef.get();
-    bool alreadyGivenExp = doc.exists && doc.data()?['expGiven'] == true;
+    final bool firstEntry = todayEntries.isEmpty;
 
     await docRef.set({
-      'entries': FieldValue.arrayUnion([note]),
-      if (!alreadyGivenExp) 'expGiven': true,
+      'entries': FieldValue.arrayUnion([text]),
     }, SetOptions(merge: true));
 
-    if (!alreadyGivenExp) {
-      final onboardingRef = FirebaseFirestore.instance
+    if (firstEntry) {
+      final profileRef = FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .collection('profile')
           .doc('onboarding');
 
-      await onboardingRef.set({
+      await profileRef.set({
         'experience.soul': FieldValue.increment(200),
       }, SetOptions(merge: true));
+    }
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              alreadyGivenExp ? '✅ You\'ve already claimed Soul EXP for today.' : '✨ You gained +100 Soul EXP for your daily gratitude!',
-            ),
-            backgroundColor: Colors.deepPurple,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-      alreadyGivenExp = true;
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(firstEntry
+              ? '✨ You gained +200 Soul EXP for your daily gratitude!'
+              : '✅ You\'ve already claimed Soul EXP for today.'),
+          backgroundColor: firstEntry ? Colors.deepPurple : Colors.grey[700],
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
 
     setState(() {
-      todayEntries.add(note);
+      todayEntries.add(text);
       _controller.clear();
-      history[todayId] = todayEntries;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return isLoading ? const Center(child: CircularProgressIndicator()) : Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("💫 Daily Gratitude", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        const SizedBox(height: 8),
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        TextField(
-          controller: _controller,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            hintText: "Type your gratitude here...",
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.send),
-              onPressed: () => addGratitude(_controller.text),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 12),
-        const Text("Today's Entries:", style: TextStyle(fontWeight: FontWeight.bold)),
-
-        const SizedBox(height: 6),
-        ...todayEntries.map((entry) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Text("• $entry"),
-        )),
-
-        const SizedBox(height: 20),
-        const Text("📅 Gratitude History", style: TextStyle(fontWeight: FontWeight.bold)),
-
-        const SizedBox(height: 6),
-        if (history.keys.where((k) => k != todayId).isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
-            child: Text("No past gratitude entries yet."),
-          )
-        else
-          ...history.entries.where((e) => e.key != todayId).map((entry) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(entry.key, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ...entry.value.map((note) => Text("• $note")),
-                ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("💫 Daily Gratitude", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: 'What are you grateful for today?',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () => submitGratitude(_controller.text),
+                ),
               ),
-            );
-          })
-
-      ],
+            ),
+            const SizedBox(height: 16),
+            const Text("Today's Entries:", style: TextStyle(fontWeight: FontWeight.bold)),
+            ...todayEntries.map((e) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text("• $e"),
+            )),
+            const SizedBox(height: 24),
+            const Text("📅 Gratitude History", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            if (pastGratitudes.isEmpty)
+              const Text("No past entries yet.")
+            else
+              ...pastGratitudes.entries.map((entry) => Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(entry.key, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ...entry.value.map((e) => Text("• $e")),
+                  ],
+                ),
+              )),
+          ],
+        ),
+      ),
     );
   }
 }
-

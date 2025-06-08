@@ -75,8 +75,7 @@ class _EmotionLoggerState extends State<EmotionLogger> {
         SnackBar(
           content: Text(
             alreadyGivenExp
-                ? '✅ You\'ve already claimed Soul EXP for today.'
-                : '✨ You gained +100 Soul EXP for logging your emotion!',
+                ? '✅ You\'ve already claimed Soul EXP for today.' : '✨ You gained +100 Soul EXP for logging your emotion!',
           ),
           backgroundColor: alreadyGivenExp ? Colors.grey[700] : Colors.deepPurple,
           duration: const Duration(seconds: 2),
