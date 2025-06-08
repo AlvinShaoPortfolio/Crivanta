@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-
+import 'package:crivanta/GratitudeWidget.dart';
 import 'package:flutter/material.dart';
 
 Widget getSkillSpecificContent(String skillName) {
@@ -10,7 +9,7 @@ Widget getSkillSpecificContent(String skillName) {
       return _workoutTip();
     case 'soul':
       return _dailyGratitude();
-    case 'emotional':
+    case 'emotions':
       return _emotionTracker();
     case 'financial':
       return _financeQuiz();
@@ -47,21 +46,8 @@ Widget _workoutTip() {
 }
 
 Widget _dailyGratitude() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text("💫 Daily Gratitude", style: TextStyle(fontWeight: FontWeight.bold)),
-      const SizedBox(height: 8),
-      const Text("What are you grateful for today?"),
-      const SizedBox(height: 8),
-      TextField(
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          hintText: "Type your gratitude here...",
-        ),
-      )
-    ],
-  );
+  return const GratitudeWidget();
+
 }
 
 Widget _emotionTracker() {
