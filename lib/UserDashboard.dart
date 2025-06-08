@@ -1,3 +1,4 @@
+import 'package:crivanta/SkillTab.dart';
 import 'package:flutter/material.dart';
 import 'package:crivanta/HeaderFileForFunctions.dart';
 
@@ -149,7 +150,7 @@ class CharacterIcon extends StatelessWidget{// stateless because managed by the 
   }
 }
 
-class SkillsIcon extends StatelessWidget{
+class SkillsIcon extends StatefulWidget{
   final bool showSkills;
   final String name;
   final Color myColor;
@@ -158,26 +159,36 @@ class SkillsIcon extends StatelessWidget{
   const SkillsIcon({super.key, required this.name, required this.showSkills, required this.myColor, required this.xCoord, required this.yCoord});
 
   @override
+  State<SkillsIcon> createState() => _SkillsIconState();
+}
+
+class _SkillsIconState extends State<SkillsIcon> {
+  @override
   Widget build(BuildContext context){
-    Alignment placement = showSkills ? Alignment(xCoord, yCoord) : Alignment(0.0, 0.0);
+    Alignment placement = widget.showSkills ? Alignment(widget.xCoord, widget.yCoord) : Alignment(0.0, 0.0);
 
     return AnimatedOpacity(//controlling the fading in
-      opacity: showSkills ? 1.0 : 0.0,
+      opacity: widget.showSkills ? 1.0 : 0.0,
       duration: Duration(milliseconds: 250),
       child: AnimatedAlign(//controlling the axis change
         duration: Duration(milliseconds: 250),
         alignment: placement,
         child: Stack(
           children: [
-            Container( //the actual box
-              width: 100,
-              height: 50,
-              decoration: BoxDecoration(
-                color: myColor,
-                borderRadius: BorderRadius.circular(8),
+            ElevatedButton(
+              onPressed: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SkillTab(skillName: widget.name, skillColor: widget.myColor)),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: widget.myColor,
+                fixedSize: const Size(110, 60),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               child: Center(
-                child: Text(name, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                child: Text(widget.name, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               ),
             ),
           ]
