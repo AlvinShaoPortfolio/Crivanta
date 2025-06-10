@@ -12,32 +12,33 @@ class EmotionLogger extends StatefulWidget {
 
 class _EmotionLoggerState extends State<EmotionLogger> {
   final String todayId = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  String? selectedEmoji;
-  bool expGiven = false;
+  String? selectedEmotion;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    checkIfLoggedToday();
+    loadTodayEmotion();
   }
 
-  Future<void> checkIfLoggedToday() async {
+  Future<void> loadTodayEmotion() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     final doc = await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
-        .collection('emotions')
+        .collection('emotional')
         .doc(todayId)
         .get();
 
     if (doc.exists) {
       setState(() {
-        selectedEmoji = doc.data()?['emotion'];
-        expGiven = doc.data()?['expGiven'] == true;
+        selectedEmotion = doc.data()?['emotional'];
       });
     }
+
+    setState(() => isLoading = false);
   }
 
   Future<void> logEmotion(String emoji) async {
@@ -47,45 +48,42 @@ class _EmotionLoggerState extends State<EmotionLogger> {
     final docRef = FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
-        .collection('emotions')
+        .collection('emotional')
         .doc(todayId);
 
     final doc = await docRef.get();
-    bool alreadyGivenExp = doc.exists && doc.data()?['expGiven'] == true;
+    final bool isFirstLogToday = !doc.exists;
 
     await docRef.set({
-      'emotion': emoji,
-      if (!alreadyGivenExp) 'expGiven': true,
+      'emotional': emoji,
     }, SetOptions(merge: true));
 
-    if (!alreadyGivenExp) {
-      final onboardingRef = FirebaseFirestore.instance
+    if (isFirstLogToday) {
+      final profileRef = FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .collection('profile')
           .doc('onboarding');
 
-      await onboardingRef.set({
-        'experience.soul': FieldValue.increment(100),
+      await profileRef.set({
+        'experience': {
+          'emotional': FieldValue.increment(150),
+        }
       }, SetOptions(merge: true));
     }
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            alreadyGivenExp
-                ? '✅ You\'ve already claimed Soul EXP for today.' : '✨ You gained +100 Soul EXP for logging your emotion!',
-          ),
-          backgroundColor: alreadyGivenExp ? Colors.grey[700] : Colors.deepPurple,
+          content: Text(isFirstLogToday ? '✨ You gained +100 Emotion EXP for logging today!' : '✅ You already claimed Emotion EXP for today.'),
+          backgroundColor: isFirstLogToday ? Colors.pinkAccent : Colors.grey[700],
           duration: const Duration(seconds: 2),
         ),
       );
     }
 
     setState(() {
-      selectedEmoji = emoji;
-      expGiven = true;
+      selectedEmotion = emoji;
     });
   }
 
@@ -93,31 +91,28 @@ class _EmotionLoggerState extends State<EmotionLogger> {
   Widget build(BuildContext context) {
     final emojis = ["😊", "😐", "😢", "😡", "😨"];
 
-    return Column(
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("❤️ Emotion Tracker", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        const SizedBox(height: 8),
+        const Text("❤️ Emotion Tracker", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
         const Text("How are you feeling today?"),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           children: emojis.map((emoji) {
-            final isSelected = emoji == selectedEmoji;
+            final isSelected = emoji == selectedEmotion;
             return ElevatedButton(
               onPressed: () => logEmotion(emoji),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isSelected ? Colors.purple.shade100 : null,
+                backgroundColor: isSelected ? Colors.pink.shade100 : null,
               ),
               child: Text(emoji, style: const TextStyle(fontSize: 24)),
             );
           }).toList(),
         ),
-        if (selectedEmoji != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Text("You logged: $selectedEmoji", style: const TextStyle(fontSize: 16)),
-          ),
       ],
     );
   }

@@ -133,19 +133,39 @@ class CharacterIcon extends StatelessWidget{// stateless because managed by the 
   const CharacterIcon({super.key, required this.pressed, required this.onPressed});
 
   @override
-  Widget build(BuildContext context){
-    double iconSize = pressed ? 100: 200;
+  Widget build(BuildContext context) {
+    double iconSize = pressed ? 100 : 200;
+
     return Center(
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 250),
         width: iconSize,
         height: iconSize,
-        child: MaterialButton(
-          onPressed: onPressed,
-          color: Colors.blue,
-          shape: CircleBorder(),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(iconSize / 2),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF1565C0), // Dark Blue
+                  Color(0xFF64B5F6), // Light Blue
+                ],
+              ),
+            ),
+            padding: const EdgeInsets.all(4),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/Avatar.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
         ),
-      )
+      ),
     );
   }
 }

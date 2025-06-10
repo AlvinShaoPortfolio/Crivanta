@@ -105,7 +105,6 @@ Future <void> increaseExperience(String userId, String field, int amount) async{
 
 Future<Color> getColor(String userId, String field) async {
   int experience = await getExperience(userId, field) ?? 0;
-  print('Getting color for $field with experience: $experience');
 
   if (experience < 500) return Colors.grey;
   if (experience < 1000) return Colors.green;

@@ -73,7 +73,9 @@ class _GratitudeWidgetState extends State<GratitudeWidget> {
           .doc('onboarding');
 
       await profileRef.set({
-        'experience.soul': FieldValue.increment(200),
+        'experience': {
+          'soul': FieldValue.increment(150),
+        }
       }, SetOptions(merge: true));
     }
 
@@ -120,14 +122,14 @@ class _GratitudeWidgetState extends State<GratitudeWidget> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            const Text("📅 Journal 📅", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
             const Text("Today's Entries:", style: TextStyle(fontWeight: FontWeight.bold)),
             ...todayEntries.map((e) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text("• $e"),
             )),
-            const SizedBox(height: 24),
-            const Text("📅 Gratitude History", style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             if (pastGratitudes.isEmpty)
               const Text("No past entries yet.")
