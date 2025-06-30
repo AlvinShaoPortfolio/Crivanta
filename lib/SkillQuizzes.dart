@@ -35,7 +35,6 @@ Widget _workoutTip() {
 
 Widget _dailyGratitude() {
   return const GratitudeWidget();
-
 }
 
 Widget _emotionTracker() {
